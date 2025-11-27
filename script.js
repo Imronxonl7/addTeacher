@@ -15,5 +15,4 @@ toggleDark.addEventListener("click", () => {
 if (localStorage.getItem("theme") === "dark") {
     html.classList.add("dark");
 }
-console.log(document.documentElement.classList.add("dark")
-);
+
