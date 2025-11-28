@@ -1,6 +1,9 @@
 let toggle = document.getElementById("darkToggle");
+let form = document.getElementById("form");
+let outerModal = document.getElementById("outer-modal");
 let teacherName = document.getElementById("teacherName")
 let singleCards = document.getElementById("single-cards")
+let selected = null
 let path = new URLSearchParams(location.search);
 let id = path.get("teacherId")
 
@@ -20,7 +23,7 @@ async function getData() {
             </span>`
         console.log(single);
         singleCards.innerHTML = `
-        <div id="card" class="[&amp;:last-child]:pb-6 p-6">
+                                    <div id="card" class="[&amp;:last-child]:pb-6 p-6 gap-6 rounded-xl border  bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                                                 <div class="flex flex-col items-center text-center"><span
                                                         data-slot="avatar"
                                                         class="relative flex size-10 shrink-0 overflow-hidden rounded-full h-32 w-32 mb-4 ring-4 ring-blue-100 dark:ring-blue-900"><img
@@ -30,7 +33,7 @@ async function getData() {
                                                             /></span>
                                                     <h2 class="text-gray-900 dark:text-white mb-2">${single.name}
                                                     </h2><span data-slot="badge"
-                                                        class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary text-secondary-foreground [a&amp;]:hover:bg-secondary/90 mb-4">${single.profession}</span>
+                                                        class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 [&amp;&gt;svg]:size-3 gap-1 [&amp;&gt;svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent bg-secondary dark:text-gray-400 text-secondary-foreground [a&amp;]:hover:bg-secondary/90 mb-4">${single.profession}</span>
                                                     <div class="w-full space-y-4 mb-6">
                                                         <div class="flex items-center justify-between text-sm"><span
                                                                 class="text-gray-600 dark:text-gray-400">Age</span><span
@@ -60,32 +63,30 @@ async function getData() {
                                                                     class="text-gray-900 dark:text-white">${single.rating}</span>
                                                             </div>
                                                         </div>
-                                                        <div aria-valuemax="100" aria-valuemin="0" role="progressbar"
-                                                            data-state="indeterminate" data-max="100"
-                                                            data-slot="progress"
-                                                            class="bg-primary/20 relative w-full overflow-hidden rounded-full h-2">
-                                                            <div data-state="indeterminate" data-max="100"
-                                                                data-slot="progress-indicator"
-                                                                class="bg-primary h-full w-full flex-1 transition-all"
-                                                                style="transform: translateX(-${100 - single.rating}%);"></div>
+                                                        <div class="mt-3">
+                                                       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                                                         <div class="h-full rounded-full transition-all duration-700 ease-out ${single.rating >= 1 ? 'dark:bg-white bg-black' : 
+                                                                         single.rating >= 4.0 ? 'bg-blue-500' : 
+                                                                         single.rating >= 3.5 ? 'bg-yellow-500' : 
+                                                                         single.rating >= 3.0 ? 'bg-orange-500' : 'bg-red-500'}"
+                                                                style="width: ${single.rating / 10}%">
+                                                         </div>
+                                                         </div> 
                                                         </div>
-                                                    </div><button
-                                                    data-action="edit" data-id="${single.id}"
-                                                        class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full gap-2"><svg
-                                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                                            stroke-width="2" stroke-linecap="round"
-                                                            stroke-linejoin="round" class="lucide lucide-pencil h-4 w-4"
-                                                            aria-hidden="true">
-                                                            <path
-                                                                d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
-                                                            </path>
-                                                            <path d="m15 5 4 4"></path>
-                                                        </svg>Edit Profile</button>
+                                                    </div><button 
+                                                    onClick="editTeacher(${single.id})"
+                                                     id="editProfileBtn" 
+                                                     class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 shrink-0 [&amp;_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-white bg-[black] text-gray-300 dark:text-gray-900  bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2 has-[&gt;svg]:px-3 w-full gap-2">
+                                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil h-4 w-4" aria-hidden="true">
+                                                         <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
+                                                      <path d="m15 5 4 4"></path>
+                                                        </svg>
+                                                        Edit Profile
+                                                     </button>
                                                 </div>
                                             </div>
                                             <div data-slot="card"
-                                                class="text-card-foreground flex flex-col gap-6 rounded-xl border lg:col-span-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                                                class="text-card-foreground  flex flex-col gap-6 rounded-xl border lg:col-span-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                                                 <div dir="ltr" data-orientation="horizontal" data-slot="tabs"
                                                     class="flex flex-col gap-2 w-full">
                                                     <div data-slot="card-header"
@@ -246,7 +247,7 @@ async function getData() {
                                                             hidden=""></div>
                                                     </div>
                                                 </div>
-                                            </div>
+    </div>
 `  
 
     }catch(err){
@@ -257,17 +258,16 @@ async function getData() {
 
 getData()
 
-// Event delegation for edit button
-singleCards.addEventListener('click', function(e) {
-    const button = e.target.closest('button[data-action="edit"]');
-    if (!button) return;
-    
-    const teacherId = button.dataset.id;
-    // Redirect to teachers page with edit mode or handle edit functionality
-    window.location.href = `./teachers.html?edit=${teacherId}`;
+// JSda tugmani topib, unga event qo'shing (tavsiya etiladi)
+document.addEventListener('DOMContentLoaded', function() {
+    const editBtn = document.querySelector('button[data-action="edit"]');
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            editTeacher(id); // id allaqachon getData() ichida mavjud
+        });
+    }
 });
 
-// Dark mode toggle
 toggle.addEventListener("click", () => {
     document.documentElement.classList.toggle("dark");
 
@@ -277,7 +277,62 @@ toggle.addEventListener("click", () => {
         localStorage.setItem("theme", "light");
     }
 });
+outerModal.addEventListener("click", function () {
+  outerModal.classList.add("hidden");
+  selected = null;
+});
+form.addEventListener("click", function (e) {
+  e.stopPropagation();
+});
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  let teacherObj = {};
+  teacherObj.name = form[0].value;
+  teacherObj.profession = form[1].value;
+  teacherObj.linkedin = form[2].value;
+  teacherObj.gmail = form[3].value;
+  teacherObj.age = form[4].value;
+  teacherObj.experience = form[5].value;
+  teacherObj.avatar = form[6].value;
+  teacherObj.science = form[7].value;
+  teacherObj.rating = form[8].value;
+  teacherObj.gender = form[9].checked;
+  // console.log(form[0].value);
+  // console.log(form[1].value);
+  // console.log(form[2].value);
+  // console.log(form[3].value);
+  // console.log(form[4].value);
+  // console.log(form[5].value);
+  // console.log(form[6].value);
+  // console.log(form[7].value);
+  // console.log(form[8].value);
+  // console.log(form[9].checked);
+  // console.log(teacherObj);
 
+  addTeacher(teacherObj);
+  selected = null;
+});
 if (localStorage.getItem("theme") === "dark") {
     document.documentElement.classList.add("dark");
+}
+async function editTeacher(id) {
+  outerModal.classList.remove("hidden");
+  selected = id;
+  try {
+    let res = await axios.get(
+      `https://69243f273ad095fb84735a27.mockapi.io/teachers/${id}`
+    );
+    form[0].value = res.data.name;
+    form[1].value = res.data.profession;
+    form[2].value = res.data.linkedin;
+    form[3].value = res.data.gmail;
+    form[4].value = res.data.age;
+    form[5].value = res.data.experience;
+    form[6].value = res.data.avatar;
+    form[7].value = res.data.science;
+    form[8].value = res.data.rating;
+    form[9].checked = res.data.gender;
+  } catch (err) {
+    console.log(err);
+  }
 }

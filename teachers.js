@@ -5,15 +5,49 @@ let teacherBtn = document.getElementById("teacherBtn");
 let selected = null;
 let pagination = document.getElementById("pagination");
 let page = 1;
-async function getTeachersData(content , page) {
+let sortName = document.getElementById("sortName")
+let sortNameValue = ""
+let search = document.getElementById("search")
+let searchValue = ""
+let filterProfession = document.getElementById("filterProfession")
+let professionValue = "all"
+
+filterProfession.addEventListener("click" ,function(e){
+  professionValue = e.target.value
+        getTeachersData(teachersCards , page , sortNameValue ,searchValue , professionValue);
+
+})
+
+search.addEventListener("input" , function(e) {
+  searchValue =e.target.value;
+      getTeachersData(teachersCards , page , sortNameValue ,searchValue , professionValue);
+
+})
+sortName.addEventListener("click" , function(e) {
+  sortNameValue = e.target.value
+  getTeachersData(teachersCards , page , sortNameValue , searchValue , professionValue);
+
+  
+})
+async function getTeachersData(content , page , sortNameValue , searchValue , professionValue) {
   try {
     let res = await axios.get(
-      `https://69243f273ad095fb84735a27.mockapi.io/teachers?page=${page}&limit=8`
+      `https://69243f273ad095fb84735a27.mockapi.io/teachers?page=${page}&limit=8${sortNameValue === "default" ? "" : `&sortBy=name&order=${sortNameValue}`}${searchValue ? `&search=${searchValue}` : ""}${professionValue === "all" ? "" : `&filter=${professionValue}`}`
     );
 
     let allRes = await axios.get(
       "https://69243f273ad095fb84735a27.mockapi.io/teachers"
     );
+
+    let allTeachers = allRes.data
+    let allProfession = allTeachers.map((el) => el.profession)
+    let professions = [...new Set(allProfession)]
+    professions.map((el) => {
+      filterProfession.innerHTML += `
+      <option value="${el}">${el}</option>`
+    })
+    
+
     let pages = Math.ceil(allRes.data.length / 10);
 
 
@@ -22,7 +56,7 @@ async function getTeachersData(content , page) {
                     <li>
                         <a href="#"
                         onClick="changePage(${page - 1})"
-                                class=" ${page === 1 ? "hidden" : ""} flex items-center justify-center text-body text-fg-brand rounded-l-md      text-body bg-white  dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-neutral-tertiary-medium hover:text-heading font-medium rounded-s-base text-sm px-3 h-9">
+                                class=" ${page === 1 ? "hidden" : ""} flex items-center justify-center text-body text-fg-brand rounded-l-md   text-body bg-white  dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-neutral-tertiary-medium hover:text-heading font-medium rounded-s-base text-sm px-3 h-9">
                                     Previous
                         </a>
                     </li>`;
@@ -185,9 +219,9 @@ async function getTeachersData(content , page) {
     console.log(err);
   }
 }
-getTeachersData(teachersCards , page);
+getTeachersData(teachersCards , page , sortNameValue , searchValue , professionValue);
 function changePage(i){
-    getTeachersData(teachersCards , i);
+    getTeachersData(teachersCards , i , sortNameValue , searchValue , professionValue);
 }
 async function addTeacher(teacherObj) {
   try {
@@ -286,4 +320,3 @@ async function deleteTeacher(id) {
     console.log(err);
   }
 }
-
